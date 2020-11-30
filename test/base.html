@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <!-- 设置360浏览器渲染模式为极速内核 -->
+  <meta name="renderer" content="webkit" />
+  <!-- 优先使用 IE 最新版本和 Chrome -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <!-- 页面描述  seo -->
+  <meta name="description" content="" />
+  <!-- 页面关键词 seo -->
+  <meta name="keywords" content="" />
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title></title>
+</head>
+<body>
+  <script src="https://cdn.bootcdn.net/ajax/libs/axios/0.21.0/axios.js"></script>
+  <script src="../dist/paxios.js"></script>
+  <script>
+    console.dir(paxios);
+    paxios.interceptor.request((config) => {
+      console.log(config)
+    })
+    paxios.interceptor.response.use((response, next) => {
+      response.test = 1
+      next(true)
+    })
+    paxios.interceptor.response.use((response, next) => {
+      console.log(response)
+      next()
+    })
+    paxios.get('https://api.apiopen.top/getJoke?page=1&count=2&type=video', {
+      test: 1
+    }).then(res => {
+      console.log(res);
+    }).catch(err => {
+      console.dir(err)
+    })
+  </script>
+</body>
+</html>
