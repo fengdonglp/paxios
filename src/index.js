@@ -60,9 +60,9 @@ function Request (opts) {
       requestPool.remove(token)
       return res
     })
-    .catch(function (thrown) {
+    .catch(function (error) {
       requestPool.remove(token)
-      return Promise.reject(thrown)
+      return interceptor.error(error, axios.isCancel(error))
     })
 
   ajaxRequest.cancel = function cancelRequest () {
@@ -124,7 +124,7 @@ service.interceptors.request.use(
     return config
   },
   error => {
-    Promise.reject(error)
+    return Promise.reject(error)
   }
 )
 
@@ -138,7 +138,7 @@ service.interceptors.response.use( // 拦截返回response
     })
   },
   error => {
-    return interceptor.error(error, axios.isCancel(error))
+    return Promise.reject(error)
   }
 )
 

@@ -2732,9 +2732,9 @@
 	  })).then(function (res) {
 	    requestPool.remove(token);
 	    return res;
-	  })["catch"](function (thrown) {
+	  })["catch"](function (error) {
 	    requestPool.remove(token);
-	    return Promise.reject(thrown);
+	    return interceptor.error(error, axios__default['default'].isCancel(error));
 	  });
 
 	  ajaxRequest.cancel = function cancelRequest() {
@@ -2797,7 +2797,7 @@
 	  interceptor.request(config);
 	  return config;
 	}, function (error) {
-	  Promise.reject(error);
+	  return Promise.reject(error);
 	});
 	service.interceptors.response.use( // 拦截返回response
 	function (response) {
@@ -2808,7 +2808,7 @@
 	    });
 	  });
 	}, function (error) {
-	  return interceptor.error(error, axios__default['default'].isCancel(error));
+	  return Promise.reject(error);
 	}); // http 请求类型
 
 	var methods = ['get', 'post', 'put', 'delete', 'head', 'options', 'patch']; // 包含 body 数据的请求类型

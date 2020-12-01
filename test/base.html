@@ -17,17 +17,28 @@
   <script src="https://cdn.bootcdn.net/ajax/libs/axios/0.21.0/axios.js"></script>
   <script src="../dist/paxios.js"></script>
   <script>
+    class HttpError extends Error {
+      constructor(code, message) {
+        super(message)
+        this.code = code
+      }
+    }
     console.dir(paxios);
     paxios.interceptor.request((config) => {
       console.log(config)
     })
+    // paxios.interceptor.response.use((response, next) => {
+    //   response.test = 1
+    //   next(true)
+    // })
     paxios.interceptor.response.use((response, next) => {
-      response.test = 1
-      next(true)
-    })
-    paxios.interceptor.response.use((response, next) => {
+      throw new HttpError(300, 'test')
       console.log(response)
       next()
+    })
+    paxios.interceptor.error((err) => {
+      console.dir(err)
+      console.log(err instanceof HttpError);
     })
     paxios.get('https://api.apiopen.top/getJoke?page=1&count=2&type=video', {
       test: 1
