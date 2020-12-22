@@ -38,6 +38,16 @@ export default {
       globals: {
         axios: 'axios'
       }
+    },
+    {
+      file: `dist/${PLUGIN_NAME}.esm.js`,
+      name: PLUGIN_NAME,
+      format: 'esm',
+      sourcemap: true,
+      plugins: [],
+      globals: {
+        axios: 'axios'
+      }
     }
   ],
   plugins: [

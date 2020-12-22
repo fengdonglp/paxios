@@ -3,7 +3,7 @@
   "version": "1.0.1",
   "description": "Axios upper package",
   "main": "dist/paxios.js",
-  "module": "index.js",
+  "module": "dist/paxios.esm.js",
   "scripts": {
     "dev": "rollup -w -c rollup.config.js --environment NODE_ENV:development",
     "build": "rollup -c rollup.config.js --environment NODE_ENV:production",

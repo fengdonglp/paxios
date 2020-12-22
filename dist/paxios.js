@@ -2745,7 +2745,7 @@
 	  return ajaxRequest;
 	}
 
-	Request.version = '1.0.0';
+	Request.version = '1.0.1';
 	Request.axios = axios__default['default'];
 	Request.service = service;
 	Request.requestPool = requestPool;
