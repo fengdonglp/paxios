@@ -1,6 +1,6 @@
 {
   "name": "@lf/paxios",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Axios upper package",
   "main": "dist/paxios.js",
   "module": "dist/paxios.esm.js",
