@@ -10,6 +10,15 @@ function noop () {}
 // 请求池
 const requestPool = new RequestPool()
 
+const CONTENT_TYPE = 'content-type'
+
+// 包含 body 数据的请求类型
+const hasDataMethod = [
+  'post',
+  'put',
+  'patch'
+]
+
 // 支持的拦截器
 const interceptor = {
   /**
@@ -46,6 +55,17 @@ function Request (opts) {
     cancelable: true
   }
   opts = merge(defaultOpts, opts)
+
+  // 统一 headers content-type 大小写，方便后期判断
+  if (opts.headers) {
+    Object.keys(opts.headers).forEach(k => {
+      if (k.toLowerCase() === CONTENT_TYPE && k !== CONTENT_TYPE) {
+        opts.headers[CONTENT_TYPE] = opts.headers[k]
+        delete opts.headers[k]
+      }
+    })
+  }
+
   const CancelToken = axios.CancelToken
   const source = CancelToken.source()
   const token = source.token
@@ -104,12 +124,14 @@ service.interceptors.request.use(
       } else {
         config.params = defaultParams
       }
-    } else if (config.method === 'post') {
-      if (config.headers['Content-Type'].indexOf('application/json') !== -1) {
+    } else if (hasDataMethod.indexOf(config.method) !== -1) {
+      const contentType = config.headers ? (config.headers[CONTENT_TYPE] || config.headers['Content-Type']) : 'application/json'
+
+      if (contentType.indexOf('application/json') !== -1) {
         config.data = Object.assign({}, config.data, defaultParams)
       }
 
-      if (config.headers['Content-Type'].indexOf('application/x-www-form-urlencoded') !== -1) {
+      if (contentType.indexOf('application/x-www-form-urlencoded') !== -1) {
         config.data = qs.stringify(config.data) // 模拟form表单提交时使用qs模块
       }
     }
@@ -145,13 +167,6 @@ const methods = [
   'delete',
   'head',
   'options',
-  'patch'
-]
-
-// 包含 body 数据的请求类型
-const hasDataMethod = [
-  'post',
-  'put',
   'patch'
 ]
 

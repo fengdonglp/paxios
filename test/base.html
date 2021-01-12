@@ -25,7 +25,7 @@
     }
     console.dir(paxios);
     paxios.interceptor.request((config) => {
-      console.log(config)
+      console.log('config', config)
     })
     // paxios.interceptor.response.use((response, next) => {
     //   response.test = 1
@@ -42,10 +42,11 @@
     })
     const data = new FormData()
     data.append('53w5', 1)
-    paxios.post('https://api.apiopen.top/getJoke?page=1&count=2&type=video', data, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+    paxios({
+      url: 'https://api.apiopen.top/getJoke?page=1&count=2&type=video',
+      method: 'post',
+      data,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     }).then(res => {
       console.log(res);
     }).catch(err => {

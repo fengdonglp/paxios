@@ -1,8 +1,8 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('core-js/modules/es.array.for-each'), require('core-js/modules/es.array.includes'), require('core-js/modules/es.array.index-of'), require('core-js/modules/es.object.assign'), require('core-js/modules/es.object.to-string'), require('core-js/modules/es.promise'), require('axios'), require('core-js/modules/es.array.filter'), require('core-js/modules/es.function.bind'), require('core-js/modules/es.array.iterator'), require('core-js/modules/es.map'), require('core-js/modules/es.string.iterator'), require('core-js/modules/web.dom-collections.for-each'), require('core-js/modules/web.dom-collections.iterator')) :
-	typeof define === 'function' && define.amd ? define(['core-js/modules/es.array.for-each', 'core-js/modules/es.array.includes', 'core-js/modules/es.array.index-of', 'core-js/modules/es.object.assign', 'core-js/modules/es.object.to-string', 'core-js/modules/es.promise', 'axios', 'core-js/modules/es.array.filter', 'core-js/modules/es.function.bind', 'core-js/modules/es.array.iterator', 'core-js/modules/es.map', 'core-js/modules/es.string.iterator', 'core-js/modules/web.dom-collections.for-each', 'core-js/modules/web.dom-collections.iterator'], factory) :
-	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.paxios = factory(null, null, null, null, null, null, global.axios));
-}(this, (function (es_array_forEach, es_array_includes, es_array_indexOf, es_object_assign, es_object_toString, es_promise, axios) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('core-js/modules/es.array.for-each'), require('core-js/modules/es.array.includes'), require('core-js/modules/es.array.index-of'), require('core-js/modules/es.object.assign'), require('core-js/modules/es.object.keys'), require('core-js/modules/es.object.to-string'), require('core-js/modules/es.promise'), require('core-js/modules/web.dom-collections.for-each'), require('axios'), require('core-js/modules/es.array.filter'), require('core-js/modules/es.function.bind'), require('core-js/modules/es.array.iterator'), require('core-js/modules/es.map'), require('core-js/modules/es.string.iterator'), require('core-js/modules/web.dom-collections.iterator')) :
+	typeof define === 'function' && define.amd ? define(['core-js/modules/es.array.for-each', 'core-js/modules/es.array.includes', 'core-js/modules/es.array.index-of', 'core-js/modules/es.object.assign', 'core-js/modules/es.object.keys', 'core-js/modules/es.object.to-string', 'core-js/modules/es.promise', 'core-js/modules/web.dom-collections.for-each', 'axios', 'core-js/modules/es.array.filter', 'core-js/modules/es.function.bind', 'core-js/modules/es.array.iterator', 'core-js/modules/es.map', 'core-js/modules/es.string.iterator', 'core-js/modules/web.dom-collections.iterator'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.paxios = factory(null, null, null, null, null, null, null, null, global.axios));
+}(this, (function (es_array_forEach, es_array_includes, es_array_indexOf, es_object_assign, es_object_keys, es_object_toString, es_promise, web_domCollections_forEach, axios) { 'use strict';
 
 	function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -2682,7 +2682,10 @@
 	function noop() {} // 请求池
 
 
-	var requestPool = new RequestPool(); // 支持的拦截器
+	var requestPool = new RequestPool();
+	var CONTENT_TYPE = 'content-type'; // 包含 body 数据的请求类型
+
+	var hasDataMethod = ['post', 'put', 'patch']; // 支持的拦截器
 
 	var interceptor = {
 	  /**
@@ -2721,7 +2724,17 @@
 	  var defaultOpts = {
 	    cancelable: true
 	  };
-	  opts = lodash_merge(defaultOpts, opts);
+	  opts = lodash_merge(defaultOpts, opts); // 统一 headers content-type 大小写，方便后期判断
+
+	  if (opts.headers) {
+	    Object.keys(opts.headers).forEach(function (k) {
+	      if (k.toLowerCase() === CONTENT_TYPE && k !== CONTENT_TYPE) {
+	        opts.headers[CONTENT_TYPE] = opts.headers[k];
+	        delete opts.headers[k];
+	      }
+	    });
+	  }
+
 	  var CancelToken = axios__default['default'].CancelToken;
 	  var source = CancelToken.source();
 	  var token = source.token;
@@ -2745,7 +2758,7 @@
 	  return ajaxRequest;
 	}
 
-	Request.version = '1.0.2';
+	Request.version = '1.0.3';
 	Request.axios = axios__default['default'];
 	Request.service = service;
 	Request.requestPool = requestPool;
@@ -2778,12 +2791,14 @@
 	    } else {
 	      config.params = defaultParams;
 	    }
-	  } else if (config.method === 'post') {
-	    if (config.headers['Content-Type'].indexOf('application/json') !== -1) {
+	  } else if (hasDataMethod.indexOf(config.method) !== -1) {
+	    var contentType = config.headers ? config.headers[CONTENT_TYPE] || config.headers['Content-Type'] : 'application/json';
+
+	    if (contentType.indexOf('application/json') !== -1) {
 	      config.data = Object.assign({}, config.data, defaultParams);
 	    }
 
-	    if (config.headers['Content-Type'].indexOf('application/x-www-form-urlencoded') !== -1) {
+	    if (contentType.indexOf('application/x-www-form-urlencoded') !== -1) {
 	      config.data = queryString.stringify(config.data); // 模拟form表单提交时使用qs模块
 	    }
 	  }
@@ -2805,9 +2820,7 @@
 	  return Promise.reject(error);
 	}); // http 请求类型
 
-	var methods = ['get', 'post', 'put', 'delete', 'head', 'options', 'patch']; // 包含 body 数据的请求类型
-
-	var hasDataMethod = ['post', 'put', 'patch'];
+	var methods = ['get', 'post', 'put', 'delete', 'head', 'options', 'patch'];
 	methods.forEach(function (method) {
 	  Request[method] = function () {
 	    var hasData = hasDataMethod.includes(method);

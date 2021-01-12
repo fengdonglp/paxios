@@ -2,15 +2,16 @@ import 'core-js/modules/es.array.for-each';
 import 'core-js/modules/es.array.includes';
 import 'core-js/modules/es.array.index-of';
 import 'core-js/modules/es.object.assign';
+import 'core-js/modules/es.object.keys';
 import 'core-js/modules/es.object.to-string';
 import 'core-js/modules/es.promise';
+import 'core-js/modules/web.dom-collections.for-each';
 import axios from 'axios';
 import 'core-js/modules/es.array.filter';
 import 'core-js/modules/es.function.bind';
 import 'core-js/modules/es.array.iterator';
 import 'core-js/modules/es.map';
 import 'core-js/modules/es.string.iterator';
-import 'core-js/modules/web.dom-collections.for-each';
 import 'core-js/modules/web.dom-collections.iterator';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
@@ -2687,7 +2688,10 @@ var RequestPool = /*#__PURE__*/function () {
 function noop() {} // 请求池
 
 
-var requestPool = new RequestPool(); // 支持的拦截器
+var requestPool = new RequestPool();
+var CONTENT_TYPE = 'content-type'; // 包含 body 数据的请求类型
+
+var hasDataMethod = ['post', 'put', 'patch']; // 支持的拦截器
 
 var interceptor = {
   /**
@@ -2726,7 +2730,17 @@ function Request(opts) {
   var defaultOpts = {
     cancelable: true
   };
-  opts = lodash_merge(defaultOpts, opts);
+  opts = lodash_merge(defaultOpts, opts); // 统一 headers content-type 大小写，方便后期判断
+
+  if (opts.headers) {
+    Object.keys(opts.headers).forEach(function (k) {
+      if (k.toLowerCase() === CONTENT_TYPE && k !== CONTENT_TYPE) {
+        opts.headers[CONTENT_TYPE] = opts.headers[k];
+        delete opts.headers[k];
+      }
+    });
+  }
+
   var CancelToken = axios.CancelToken;
   var source = CancelToken.source();
   var token = source.token;
@@ -2750,7 +2764,7 @@ function Request(opts) {
   return ajaxRequest;
 }
 
-Request.version = '1.0.2';
+Request.version = '1.0.3';
 Request.axios = axios;
 Request.service = service;
 Request.requestPool = requestPool;
@@ -2783,12 +2797,14 @@ service.interceptors.request.use(function (config) {
     } else {
       config.params = defaultParams;
     }
-  } else if (config.method === 'post') {
-    if (config.headers['Content-Type'].indexOf('application/json') !== -1) {
+  } else if (hasDataMethod.indexOf(config.method) !== -1) {
+    var contentType = config.headers ? config.headers[CONTENT_TYPE] || config.headers['Content-Type'] : 'application/json';
+
+    if (contentType.indexOf('application/json') !== -1) {
       config.data = Object.assign({}, config.data, defaultParams);
     }
 
-    if (config.headers['Content-Type'].indexOf('application/x-www-form-urlencoded') !== -1) {
+    if (contentType.indexOf('application/x-www-form-urlencoded') !== -1) {
       config.data = queryString.stringify(config.data); // 模拟form表单提交时使用qs模块
     }
   }
@@ -2810,9 +2826,7 @@ function (response) {
   return Promise.reject(error);
 }); // http 请求类型
 
-var methods = ['get', 'post', 'put', 'delete', 'head', 'options', 'patch']; // 包含 body 数据的请求类型
-
-var hasDataMethod = ['post', 'put', 'patch'];
+var methods = ['get', 'post', 'put', 'delete', 'head', 'options', 'patch'];
 methods.forEach(function (method) {
   Request[method] = function () {
     var hasData = hasDataMethod.includes(method);
