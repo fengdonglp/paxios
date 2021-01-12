@@ -40,8 +40,12 @@
       console.dir(err)
       console.log(err instanceof HttpError);
     })
-    paxios.get('https://api.apiopen.top/getJoke?page=1&count=2&type=video', {
-      test: 1
+    const data = new FormData()
+    data.append('53w5', 1)
+    paxios.post('https://api.apiopen.top/getJoke?page=1&count=2&type=video', data, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
     }).then(res => {
       console.log(res);
     }).catch(err => {

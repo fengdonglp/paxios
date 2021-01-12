@@ -105,17 +105,12 @@ service.interceptors.request.use(
         config.params = defaultParams
       }
     } else if (config.method === 'post') {
-      let data = null
-      if (config.data) {
-        data = Object.assign({}, config.data, defaultParams)
-      } else {
-        data = defaultParams
+      if (config.headers['Content-Type'].indexOf('application/json') !== -1) {
+        config.data = Object.assign({}, config.data, defaultParams)
       }
 
-      if (config.headers['Content-Type'] === 'application/x-www-form-urlencoded') {
-        config.data = qs.stringify(data) // 模拟form表单提交时使用qs模块
-      } else {
-        config.data = data
+      if (config.headers['Content-Type'].indexOf('application/x-www-form-urlencoded') !== -1) {
+        config.data = qs.stringify(config.data) // 模拟form表单提交时使用qs模块
       }
     }
 

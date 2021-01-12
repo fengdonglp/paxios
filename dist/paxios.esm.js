@@ -1,5 +1,6 @@
 import 'core-js/modules/es.array.for-each';
 import 'core-js/modules/es.array.includes';
+import 'core-js/modules/es.array.index-of';
 import 'core-js/modules/es.object.assign';
 import 'core-js/modules/es.object.to-string';
 import 'core-js/modules/es.promise';
@@ -2749,7 +2750,7 @@ function Request(opts) {
   return ajaxRequest;
 }
 
-Request.version = '1.0.1';
+Request.version = '1.0.2';
 Request.axios = axios;
 Request.service = service;
 Request.requestPool = requestPool;
@@ -2783,18 +2784,12 @@ service.interceptors.request.use(function (config) {
       config.params = defaultParams;
     }
   } else if (config.method === 'post') {
-    var data = null;
-
-    if (config.data) {
-      data = Object.assign({}, config.data, defaultParams);
-    } else {
-      data = defaultParams;
+    if (config.headers['Content-Type'].indexOf('application/json') !== -1) {
+      config.data = Object.assign({}, config.data, defaultParams);
     }
 
-    if (config.headers['Content-Type'] === 'application/x-www-form-urlencoded') {
-      config.data = queryString.stringify(data); // 模拟form表单提交时使用qs模块
-    } else {
-      config.data = data;
+    if (config.headers['Content-Type'].indexOf('application/x-www-form-urlencoded') !== -1) {
+      config.data = queryString.stringify(config.data); // 模拟form表单提交时使用qs模块
     }
   }
 

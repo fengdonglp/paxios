@@ -1,8 +1,8 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('core-js/modules/es.array.for-each'), require('core-js/modules/es.array.includes'), require('core-js/modules/es.object.assign'), require('core-js/modules/es.object.to-string'), require('core-js/modules/es.promise'), require('axios'), require('core-js/modules/es.array.filter'), require('core-js/modules/es.function.bind'), require('core-js/modules/es.array.iterator'), require('core-js/modules/es.map'), require('core-js/modules/es.string.iterator'), require('core-js/modules/web.dom-collections.for-each'), require('core-js/modules/web.dom-collections.iterator')) :
-	typeof define === 'function' && define.amd ? define(['core-js/modules/es.array.for-each', 'core-js/modules/es.array.includes', 'core-js/modules/es.object.assign', 'core-js/modules/es.object.to-string', 'core-js/modules/es.promise', 'axios', 'core-js/modules/es.array.filter', 'core-js/modules/es.function.bind', 'core-js/modules/es.array.iterator', 'core-js/modules/es.map', 'core-js/modules/es.string.iterator', 'core-js/modules/web.dom-collections.for-each', 'core-js/modules/web.dom-collections.iterator'], factory) :
-	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.paxios = factory(null, null, null, null, null, global.axios));
-}(this, (function (es_array_forEach, es_array_includes, es_object_assign, es_object_toString, es_promise, axios) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('core-js/modules/es.array.for-each'), require('core-js/modules/es.array.includes'), require('core-js/modules/es.array.index-of'), require('core-js/modules/es.object.assign'), require('core-js/modules/es.object.to-string'), require('core-js/modules/es.promise'), require('axios'), require('core-js/modules/es.array.filter'), require('core-js/modules/es.function.bind'), require('core-js/modules/es.array.iterator'), require('core-js/modules/es.map'), require('core-js/modules/es.string.iterator'), require('core-js/modules/web.dom-collections.for-each'), require('core-js/modules/web.dom-collections.iterator')) :
+	typeof define === 'function' && define.amd ? define(['core-js/modules/es.array.for-each', 'core-js/modules/es.array.includes', 'core-js/modules/es.array.index-of', 'core-js/modules/es.object.assign', 'core-js/modules/es.object.to-string', 'core-js/modules/es.promise', 'axios', 'core-js/modules/es.array.filter', 'core-js/modules/es.function.bind', 'core-js/modules/es.array.iterator', 'core-js/modules/es.map', 'core-js/modules/es.string.iterator', 'core-js/modules/web.dom-collections.for-each', 'core-js/modules/web.dom-collections.iterator'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.paxios = factory(null, null, null, null, null, null, global.axios));
+}(this, (function (es_array_forEach, es_array_includes, es_array_indexOf, es_object_assign, es_object_toString, es_promise, axios) { 'use strict';
 
 	function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -2745,7 +2745,7 @@
 	  return ajaxRequest;
 	}
 
-	Request.version = '1.0.1';
+	Request.version = '1.0.2';
 	Request.axios = axios__default['default'];
 	Request.service = service;
 	Request.requestPool = requestPool;
@@ -2779,18 +2779,12 @@
 	      config.params = defaultParams;
 	    }
 	  } else if (config.method === 'post') {
-	    var data = null;
-
-	    if (config.data) {
-	      data = Object.assign({}, config.data, defaultParams);
-	    } else {
-	      data = defaultParams;
+	    if (config.headers['Content-Type'].indexOf('application/json') !== -1) {
+	      config.data = Object.assign({}, config.data, defaultParams);
 	    }
 
-	    if (config.headers['Content-Type'] === 'application/x-www-form-urlencoded') {
-	      config.data = queryString.stringify(data); // 模拟form表单提交时使用qs模块
-	    } else {
-	      config.data = data;
+	    if (config.headers['Content-Type'].indexOf('application/x-www-form-urlencoded') !== -1) {
+	      config.data = queryString.stringify(config.data); // 模拟form表单提交时使用qs模块
 	    }
 	  }
 
